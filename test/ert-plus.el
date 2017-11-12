@@ -1,0 +1,68 @@
+;;; -*- lexical-binding: t; -*-
+
+(require 'advice)
+(require 'cl-lib)
+
+(require 'ert)
+
+(defun ertp--nest (parent child)
+  (if (and parent child)
+      (let ((result (cl-subst child 'cb parent))
+            (name (nth 1 (nth 1 parent))))
+        (setf (nth 1 result) (nth 1 child))
+        (if (or (equal parent result)
+                (not (equal parent (ad-substitute-tree (lambda (t) (equal t '(cb)))
+                                                       (lambda (t) 0) parent))))
+            (error "Around must contain bare symbol cb (%s)" name))
+        result)
+    (or child parent)))
+
+(defun ertp--deftest (describe-name around it)
+  (let* ((name (nth 1 it))
+         (body (nthcdr 2 it))
+         (test-name (concat describe-name " :: " name))
+         (test-symbol (intern test-name))
+         (ert-body (ertp--nest around `(progn ',test-symbol ,@body))))
+    `(ert-deftest ,test-symbol ()
+       :tags '(:ertp)
+       ,ert-body)))
+
+(defun ertp--describe-nested (parent-name parent-arounds body)
+  (setf (nth 1 body) (concat parent-name " :: " (nth 1 body)))
+  (setf (nth 2 body) (append parent-arounds (nth 2 body)))
+  body)
+
+(defalias 'describe 'ertp--describe)
+(defmacro ertp--describe (name arounds &rest body)
+  (declare (indent 2))
+  (let* (print-level
+         print-length
+         (around-bodies (mapcar (lambda (sym) `(progn ',sym ,@(nthcdr 2 (symbol-function sym))))
+                                arounds))
+         (around (cl-reduce 'ertp--nest around-bodies :initial-value '(progn 'initial-around cb)))
+         (raw-its (cl-remove-if-not (lambda (body) (eq 'it (car body))) body))
+         (unique-its (cl-remove-duplicates (mapcar (lambda (it) (nth 1 it)) raw-its) :test 'equal))
+         (its (mapcar (apply-partially 'ertp--deftest name around) raw-its))
+         (describes (cl-remove-if-not (lambda (body) (eq 'describe (car body))) body))
+         (describes (mapcar (apply-partially 'ertp--describe-nested name arounds) describes))
+         (body `(progn ,@its ,@describes))
+         (unbind-old (lambda (symbol) (if (string-prefix-p name (symbol-name symbol))
+                                          (ert-make-test-unbound symbol)))))
+    (unless (equal (length its) (length unique-its)) (error "It blocks must have unique names"))
+    (mapc unbind-old (apropos-internal "" #'ert-test-boundp))
+    body))
+
+(define-advice ert-results-find-test-at-point-other-window (:around (fn) ert-plus)
+  (let* ((symbol (ert-test-at-point))
+         (ert-test (get symbol 'ert--test))
+         (tags (and ert-test (ert-test-tags ert-test))))
+    (if (not (member :ertp tags))
+        (funcall fn)
+      (switch-to-buffer-other-window (car (find-definition-noselect symbol 'ert-deftest)))
+      (setf (point) (point-min))
+      (cl-loop for i from 0
+            for part in (split-string (symbol-name symbol) " :: ")
+            do (search-forward part))
+      (beginning-of-line-text))))
+
+(provide 'ert-plus)

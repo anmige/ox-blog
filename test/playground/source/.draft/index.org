@@ -1,0 +1,5 @@
+#+TITLE: Title
+#+SUBTITLE: Subtitle
+#+DATE: <2017-01-01>
+#+CATEGORIES: a b c
+#+TYPE: post
