@@ -1,0 +1,61 @@
+* ox-blog
+The =ox-blog= package allows you to write and publish a blog from within emacs.
+- livereload (reload browser on export)
+- categories
+- drafts
+- small enough to read through it
+  - < 1000 lines of code (~ 500 at the time of writing)
+  - no external dependencies (just =emacs 25+= with =org-mode 9+=)
+
+The goal is to provide a user-friendly blogging environment for emacs that just works™.
+** TODO API (TODO)
+*** Functions
+- =org-blog-export= export with drafts
+- =org-blog-publish= export production (hide drafts) & push =export-directory= repository to origin
+*** Variables
+- =org-blog-project= project plist, similar to a single entry from =org-publish-project-alist=
+- =org-blog-draft-prefix=
+- =org-blog--template-index=
+- =org-blog--template-index-item=
+- =org-blog--template-category-js=
+- =org-blog--server-livereload-script=
+*** Custom project options
+- =:source-directory=
+- =:export-directory=
+- =:port=
+- =:babel-evaluate=
+- =:babel-header-args=
+- =:index-head=
+** Setup
+To get started you need set =org-blog-project= and provide a source and an
+export directory. Then just start writing and call =org-blog-export= to
+export.
+#+BEGIN_SRC elisp
+(setq org-blog-project '(:source-directory "~/blog/source"
+                         :export-directory "~/blog/export"))
+#+END_SRC
+
+See the =source/= folder for an example configuration.
+
+To prevent non-production information from being published, add the
+=org-blog-draft-prefix= and =cache.el= to your export repository =.gitignore=.
+By default the prefix is =.= and the =.gitignore= could look like this.
+#+BEGIN_SRC
+.*
+!.gitignore
+cache.el
+#+END_SRC
+* Develoment
+#+BEGIN_SRC sh
+make install
+make test
+#+END_SRC
+* Features
+** Planned
+** Ideas
+*** categories on index page
+*** code block css or sub process export
+Exporting with a different color scheme is thus not possible right now as themes can only be set globally.
+Possible solutions:
+- export in subprocess (i.e. =emacs --batch...=)
+- use css rather than inline-css for =org-html-htmlize-output-type=
