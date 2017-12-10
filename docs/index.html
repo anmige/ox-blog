@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Niklas Fasching" />
+<link rel='stylesheet' href='/ox-blog/default.css' type='text/css'/>
+</head>
+<body>
+<div id="preamble" class="status">
+
+<head>
+<a href='/ox-blog/'>home</a>
+</head>
+</div>
+<div id="content">
+<h1 class="title">Home</h1>
+<ul class='index'>
+
+<li class='post' data-categories='category-a'>
+  <a href='some-other-post.html'>
+    <date>2017-12-10</date>
+    <span>Another post</span>
+  </a>
+</li>
+
+
+<li class='post' data-categories='emacs org-blog'>
+  <a href='project.html'>
+    <date>2017-12-10</date>
+    <span>Project Definition</span>
+  </a>
+</li>
+
+</ul>
+
+<script>
+let originalTitle = document.querySelector('.title').textContent;
+function updateIndex() {
+  const category = window.location.hash.slice(1);
+  if (category) {
+    document.querySelector('.title').textContent =
+      category.charAt(0).toUpperCase() + category.slice(1);
+    document.querySelectorAll('.index li')
+      .forEach(li => {
+        const categories = li.dataset.categories.split(' ');
+        if (categories.includes(category)) {
+          li.style.display = 'block';
+        } else {
+          li.style.display = 'none';
+        }
+      });
+  } else {
+    document.querySelector('.title').textContent = originalTitle;
+    document.querySelectorAll('.index li').forEach(li => {
+      li.style.display = 'block';
+    });
+  }
+}
+
+window.addEventListener('hashchange', updateIndex);
+updateIndex();
+</script>
+</div>
+</body>
+</html>

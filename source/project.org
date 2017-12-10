@@ -1,0 +1,23 @@
+#+TITLE: Project Definition
+#+SUBTITLE: Used to generate this site
+#+DATE: <2017-12-10>
+#+TYPE: post
+#+CATEGORIES: emacs org-blog
+
+* Let's see
+#+BEGIN_SRC emacs-lisp
+(require 'ox-blog)
+(setq org-blog-project '(:source-directory "source"
+                         :export-directory "docs"
+                         :html-head "<link rel='stylesheet' href='/ox-blog/default.css' type='text/css'/>"
+                         :html-head-include-scripts nil
+                         :html-head-include-default-style nil
+                         :html-postamble ""
+                         :html-preamble "
+<head>
+<a href='/ox-blog/'>home</a>
+</head>"
+                         :time-stamp-file nil
+                         :with-toc nil))
+(org-blog-export t t)
+#+END_SRC
