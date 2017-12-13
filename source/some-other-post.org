@@ -1,5 +1,0 @@
-#+TITLE: Another post
-#+SUBTITLE: to demponstrate categories
-#+DATE: <2017-12-10>
-#+TYPE: post
-#+CATEGORIES: category-a

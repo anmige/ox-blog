@@ -8,18 +8,37 @@
                                                           load-file-name
                                                         buffer-file-name))))
 
+(defun org-blog-test--with-file (name content)
+  (declare (indent 1))
+  (let* ((file (expand-file-name name))
+         (directory (file-name-directory file)))
+    (unless (file-directory-p directory)) (mkdir directory t)
+    (with-temp-file file (insert content))))
+
 (defun org-blog-test--with-project ()
   (let* ((default-directory org-blog-test--test-directory)
          (source-directory (expand-file-name "source"))
          (export-directory (expand-file-name "export"))
-         (project (list :with-toc nil
-                        :source-directory source-directory
+         (project (list :source-directory source-directory
                         :export-directory export-directory)))
-    (if (file-directory-p export-directory)
-        (delete-directory export-directory 'recursive))
+    (ignore-errors
+      (delete-directory source-directory 'recursive)
+      (delete-directory export-directory 'recursive))
+    (org-blog-test--with-file "source/draft/index.org"
+      (concat "#+TITLE: Title\n"
+              "#+SUBTITLE: Subtitle\n"
+              "#+CATEGORIES: a b c\n"
+              "#+TYPE: post\n"))
+    (org-blog-test--with-file "source/post/index.org"
+      (concat "#+TITLE: Title\n"
+              "#+SUBTITLE: Subtitle\n"
+              "#+CATEGORIES: a b c\n"
+              "#+TYPE: post\n"
+              "#+DATE: <2017-01-01>"))
+    (org-blog-test--with-file "source/asset/main.css" "")
     (make-directory export-directory)
     cb
-    (delete-directory export-directory 'recursive)))
+    (delete-directory default-directory 'recursive)))
 
 (defun org-blog-test--with-server ()
   (let ((server (org-blog--server project)))
@@ -37,7 +56,7 @@
 
 (defun org-blog-test--with-index ()
   (let* ((post-file (expand-file-name "source/post/index.org"))
-         (draft-file (expand-file-name "source/.draft/index.org"))
+         (draft-file (expand-file-name "source/draft/index.org"))
          (org-files (list post-file draft-file))
          (file-nodes (mapcar (apply-partially 'org-blog--file-node project) org-files))
          (org-nodes (mapcar (lambda (file-node)
@@ -84,7 +103,7 @@
         (should (equal (plist-get org-node :draft) nil))))
 
   (it "should correctly set the draft attribute"
-      (let* ((draft-file (expand-file-name "source/.draft/index.org"))
+      (let* ((draft-file (expand-file-name "source/draft/index.org"))
              (file-node (org-blog--file-node project draft-file))
              (org-node (with-temp-buffer
                          (insert-file-contents draft-file)
@@ -180,10 +199,10 @@
   (it "should find all files recursively"
         (let* ((files (org-blog--directory-files source-directory))
                (relative-files (mapcar (lambda (f) (file-relative-name f source-directory)) files)))
-          (should (equal relative-files '("asset/main.css" "post/index.org" ".draft/index.org")))))
+          (should (equal relative-files '("asset/main.css" "post/index.org" "draft/index.org")))))
 
     (it "should exclude excluded files and directories"
-        (let* ((files (org-blog--directory-files source-directory '(".draft/" "main.css")))
+        (let* ((files (org-blog--directory-files source-directory '("draft/" "main.css")))
                (relative-files (mapcar (lambda (f) (file-relative-name f source-directory)) files)))
           (should (equal relative-files '("post/index.org"))))))
 
@@ -225,6 +244,10 @@
 
 (describe "org-blog--index" (org-blog-test--with-project
                              org-blog-test--with-index)
+
+  (it "should prefer index-head to html-head"
+      (ert-skip "pending"))
+
   (it "should list all posts (inluding drafts) by default"
       (org-blog--index project org-nodes nil)
       (with-temp-buffer
