@@ -1,0 +1,7 @@
+#+TITLE: ox-blog
+#+SUBTITLE: about page
+#+DATE: <2017-12-10>
+#+TYPE: not-post
+
+* Not a post
+This page doesn't have it's type set to =post=, so it's not listed in the index.

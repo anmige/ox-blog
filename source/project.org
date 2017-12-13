@@ -1,23 +1,56 @@
 #+TITLE: Project Definition
-#+SUBTITLE: Used to generate this site
-#+DATE: <2017-12-10>
+#+SUBTITLE: How this site is generated
+#+DATE: <2017-12-12>
 #+TYPE: post
 #+CATEGORIES: emacs org-blog
 
-* Let's see
+* Configuration
+The source and export directory are set relative in this case as the export is
+executed via the =export= target in the =Makefile= of the parent
+folder.
 #+BEGIN_SRC emacs-lisp
 (require 'ox-blog)
+
 (setq org-blog-project '(:source-directory "source"
                          :export-directory "docs"
-                         :html-head "<link rel='stylesheet' href='/ox-blog/default.css' type='text/css'/>"
+                         :html-head "
+<link rel='stylesheet' href='/ox-blog/main.css' type='text/css'/>"
+                         :index-head "
+<meta name='description' content='ox-blog demo project'>
+<link rel='stylesheet' href='/ox-blog/main.css' type='text/css'/>
+<link rel='stylesheet' href='/ox-blog/index.css' type='text/css'/>"
+                         :html-preamble "
+<header>
+  <a class='logo' href='/ox-blog/'>home</a>
+  <nav>
+    <a href='https://www.github.com/niklasfasching/ox-blog'>github</a>
+    <a href='about.html'>about</a>
+  </nav>
+</header>"
+                         :html-postamble ""
                          :html-head-include-scripts nil
                          :html-head-include-default-style nil
-                         :html-postamble ""
-                         :html-preamble "
-<head>
-<a href='/ox-blog/'>home</a>
-</head>"
                          :time-stamp-file nil
+                         :with-sub-superscript {}
                          :with-toc nil))
+#+END_SRC
+
+The =Makefile=.
+#+INCLUDE: ../Makefile src makefile
+
+* Export
+The production and force flags are set. This means drafts are excluded from the
+index and all files, not just files modified since the last export, are
+exported.
+
+To export highlighted code blocks a theme has to be loaded.
+Sadly, =emacs --batch= claims to have a monochrome display - which makes face
+definitions restricted to color displays not apply.
+Overriding =face-spec-set-match-display= is just a way of getting these faces
+applied nonetheless.
+
+#+BEGIN_SRC emacs-lisp
+(defun face-spec-set-match-display (&rest args) t)
+(load-theme 'wombat)
 (org-blog-export t t)
 #+END_SRC

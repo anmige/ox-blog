@@ -130,3 +130,20 @@ pre.src, pre.example {
   display: inline;
   margin-right: 0.5em;
 }
+
+/* Header (not org mode related) */
+
+header {
+  display: flex;
+  justify-content: space-between;
+}
+
+header nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header a + a {
+  margin-left: 1rem;
+}

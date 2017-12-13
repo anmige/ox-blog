@@ -8,41 +8,128 @@
 <title>Project Definition</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Niklas Fasching" />
-<link rel='stylesheet' href='/ox-blog/default.css' type='text/css'/>
+
+<link rel='stylesheet' href='/ox-blog/main.css' type='text/css'/>
 </head>
 <body>
 <div id="preamble" class="status">
 
-<head>
-<a href='/ox-blog/'>home</a>
-</head>
+<header>
+  <a class='logo' href='/ox-blog/'>home</a>
+  <nav>
+    <a href='https://www.github.com/niklasfasching/ox-blog'>github</a>
+    <a href='about.html'>about</a>
+  </nav>
+</header>
 </div>
 <div id="content">
 <h1 class="title">Project Definition
 <br />
-<span class="subtitle">Used to generate this site</span>
+<span class="subtitle">How this site is generated</span>
 </h1>
 <ul class='categories'>
 <li><a href='./#emacs'>emacs</a></li>
 <li><a href='./#org-blog'>org-blog</a></li>
 </ul>
-<div id="outline-container-orgc39c1d2" class="outline-2">
-<h2 id="orgc39c1d2"><span class="section-number-2">1</span> Let's see</h2>
+<div id="outline-container-orgc0bd188" class="outline-2">
+<h2 id="orgc0bd188"><span class="section-number-2">1</span> Configuration</h2>
 <div class="outline-text-2" id="text-1">
+<p>
+The source and export directory are set relative in this case as the export is
+executed via the <code>export</code> target in the <code>Makefile</code> of the parent
+folder.
+</p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="font-weight: bold;">require</span> '<span style="font-weight: bold; text-decoration: underline;">ox-blog</span>)
-(<span style="font-weight: bold;">setq</span> org-blog-project '(<span style="font-weight: bold;">:source-directory</span> <span style="font-style: italic;">"source"</span>
-                         <span style="font-weight: bold;">:export-directory</span> <span style="font-style: italic;">"docs"</span>
-                         <span style="font-weight: bold;">:html-head</span> <span style="font-style: italic;">"&lt;link rel='stylesheet' href='/ox-blog/default.css' type='text/css'/&gt;"</span>
-                         <span style="font-weight: bold;">:html-head-include-scripts</span> nil
-                         <span style="font-weight: bold;">:html-head-include-default-style</span> nil
-                         <span style="font-weight: bold;">:html-postamble</span> <span style="font-style: italic;">""</span>
-                         <span style="font-weight: bold;">:html-preamble</span> <span style="font-style: italic;">"</span>
-<span style="font-style: italic;">&lt;head&gt;</span>
-<span style="font-style: italic;">&lt;a href='/ox-blog/'&gt;home&lt;/a&gt;</span>
-<span style="font-style: italic;">&lt;/head&gt;"</span>
-                         <span style="font-weight: bold;">:time-stamp-file</span> nil
-                         <span style="font-weight: bold;">:with-toc</span> nil))
+<pre class="src src-emacs-lisp">(<span style="color: #8ac6f2; font-weight: bold;">require</span> '<span style="color: #e5786d;">ox-blog</span>)
+
+(<span style="color: #8ac6f2; font-weight: bold;">setq</span> org-blog-project '(<span style="color: #e5786d;">:source-directory</span> <span style="color: #95e454;">"source"</span>
+                         <span style="color: #e5786d;">:export-directory</span> <span style="color: #95e454;">"docs"</span>
+                         <span style="color: #e5786d;">:html-head</span> <span style="color: #95e454;">"</span>
+<span style="color: #95e454;">&lt;link rel='stylesheet' href='/ox-blog/main.css' type='text/css'/&gt;"</span>
+                         <span style="color: #e5786d;">:index-head</span> <span style="color: #95e454;">"</span>
+<span style="color: #95e454;">&lt;meta name='description' content='ox-blog demo project'&gt;</span>
+<span style="color: #95e454;">&lt;link rel='stylesheet' href='/ox-blog/main.css' type='text/css'/&gt;</span>
+<span style="color: #95e454;">&lt;link rel='stylesheet' href='/ox-blog/index.css' type='text/css'/&gt;"</span>
+                         <span style="color: #e5786d;">:html-preamble</span> <span style="color: #95e454;">"</span>
+<span style="color: #95e454;">&lt;header&gt;</span>
+<span style="color: #95e454;">  &lt;a class='logo' href='/ox-blog/'&gt;home&lt;/a&gt;</span>
+<span style="color: #95e454;">  &lt;nav&gt;</span>
+<span style="color: #95e454;">    &lt;a href='https://www.github.com/niklasfasching/ox-blog'&gt;github&lt;/a&gt;</span>
+<span style="color: #95e454;">    &lt;a href='about.html'&gt;about&lt;/a&gt;</span>
+<span style="color: #95e454;">  &lt;/nav&gt;</span>
+<span style="color: #95e454;">&lt;/header&gt;"</span>
+                         <span style="color: #e5786d;">:html-postamble</span> <span style="color: #95e454;">""</span>
+                         <span style="color: #e5786d;">:html-head-include-scripts</span> nil
+                         <span style="color: #e5786d;">:html-head-include-default-style</span> nil
+                         <span style="color: #e5786d;">:time-stamp-file</span> nil
+                         <span style="color: #e5786d;">:with-sub-superscript</span> {}
+                         <span style="color: #e5786d;">:with-toc</span> nil))
+</pre>
+</div>
+
+<p>
+The <code>Makefile</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-makefile"><span style="color: #cae682;">.PHONY</span>: install
+<span style="color: #cae682;">install</span>:
+        emacs \
+                --batch \
+                --quick \
+                --eval <span style="color: #95e454;">"(require 'package)"</span> \
+                --eval <span style="color: #95e454;">'(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")))'</span> \
+                --eval <span style="color: #95e454;">'(setq package-user-dir (concat default-directory ".emacs"))'</span> \
+                --eval <span style="color: #95e454;">'(package-initialize)'</span> \
+                --eval <span style="color: #95e454;">"(package-refresh-contents)"</span> \
+                --eval <span style="color: #95e454;">"(package-install-from-archive (cadr (assoc 'org package-archive-contents)))"</span> \
+                --eval <span style="color: #95e454;">"(package-install-from-archive (cadr (assoc 'htmlize package-archive-contents)))"</span>
+
+<span style="color: #cae682;">.PHONY</span>: test
+<span style="color: #cae682;">test</span>:
+        emacs \
+                --batch \
+                --quick \
+                --eval <span style="color: #95e454;">'(setq package-user-dir (concat default-directory ".emacs"))'</span> \
+                --eval <span style="color: #95e454;">'(package-initialize)'</span> \
+                --eval <span style="color: #95e454;">'(normal-top-level-add-to-load-path (list "test" "."))'</span> \
+                --eval <span style="color: #95e454;">'(load "test/ox-blog-test.el")'</span> \
+                --eval <span style="color: #95e454;">'(load "test/ert-plus-test.el")'</span> \
+                --eval <span style="color: #95e454;">'(ert-run-tests-batch-and-exit)'</span>
+
+<span style="color: #cae682;">.PHONY</span>: export
+<span style="color: #cae682;">export</span>:
+        emacs \
+                --batch \
+                --quick \
+                --eval <span style="color: #95e454;">'(setq package-user-dir (concat default-directory ".emacs"))'</span> \
+                --eval <span style="color: #95e454;">'(package-initialize)'</span> \
+                --eval <span style="color: #95e454;">'(normal-top-level-add-to-load-path (list "."))'</span> \
+                --eval <span style="color: #95e454;">'(org-babel-load-file (expand-file-name "source/project.org" default-directory))'</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge2a1fcb" class="outline-2">
+<h2 id="orge2a1fcb"><span class="section-number-2">2</span> Export</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The production and force flags are set. This means drafts are excluded from the
+index and all files, not just files modified since the last export, are
+exported.
+</p>
+
+<p>
+To export highlighted code blocks a theme has to be loaded.
+Sadly, <code>emacs --batch</code> claims to have a monochrome display - which makes face
+definitions restricted to color displays not apply.
+Overriding <code>face-spec-set-match-display</code> is just a way of getting these faces
+applied nonetheless.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #8ac6f2; font-weight: bold;">defun</span> <span style="color: #cae682;">face-spec-set-match-display</span> (<span style="color: #92a65e; font-weight: bold;">&amp;rest</span> args) t)
+(load-theme 'wombat)
 (org-blog-export t t)
 </pre>
 </div>

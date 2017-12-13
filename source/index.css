@@ -1,0 +1,23 @@
+.index {
+  margin: 0;
+  list-style: none;
+}
+
+.index date {
+  font-family: monospace;
+  font-size: 0.8rem;
+  vertical-align: middle;
+  padding-right: 2rem;
+  color: grey;
+}
+
+.index a {
+  display: block;
+  padding: 0.5em 0;
+  color: black;
+}
+
+.index a:hover, a:focus, a:active {
+  text-decoration: none;
+  background: rgba(200,200,200,0.2);
+}
