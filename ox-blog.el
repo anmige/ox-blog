@@ -12,7 +12,6 @@
 (if (version< org-version "9") (error "org-blog requires org version >= 9"))
 
 (defvar org-blog-project '())
-(defvar org-blog-draft-prefix ".")
 
 (org-export-define-derived-backend 'blog 'html
   :options-alist '((:categories "CATEGORIES") (:type "TYPE"))
@@ -57,16 +56,15 @@
 
 (defun org-blog--org-node (project file-node)
   (let* ((plist (org-export-get-environment 'blog))
-         (draft (cl-some (lambda (part) (string-prefix-p org-blog-draft-prefix part))
-                         (split-string (plist-get file-node :href) "/")))
          (org-date (assq 'timestamp (plist-get plist :date)))
          (date (if org-date (date-to-time (org-timestamp-format org-date "%Y%m%dT%H%M%S"))))
+         (draft (null date))
          (type (org-no-properties (plist-get plist :type)))
          (categories (org-no-properties (plist-get plist :categories)))
          (title (org-no-properties (car (plist-get plist :title))))
          (subtitle (org-no-properties (car (plist-get plist :subtitle)))))
-    (org-combine-plists file-node `(:draft ,draft :date ,date :type ,type :title ,title
-                                    :subtitle ,subtitle :categories ,categories))))
+    (org-combine-plists file-node (list :draft draft :date date :type type :title title
+                                        :subtitle subtitle :categories categories))))
 
 (defun org-blog--file-node (project source-path)
   (let* ((relative-path (file-relative-name source-path (plist-get project :source-directory)))
@@ -78,16 +76,16 @@
          (source-modified (nth 5 (file-attributes source-path)))
          (export-modified (nth 5 (file-attributes export-path)))
          (modified (or (not export-modified) (time-less-p export-modified source-modified))))
-    `(:source-path ,source-path :export-path ,export-path
-      :href ,relative-export-path :extension ,extension :modified ,modified)))
+    (list :source-path source-path :export-path export-path
+          :href relative-export-path :extension extension :modified modified)))
 
 (defun org-blog--export (project &optional production force)
   (org-blog--validate-project project)
   (let* ((files (org-blog--directory-files (plist-get project :source-directory)))
          (file-nodes (mapcar (apply-partially 'org-blog--file-node project) files))
          (modified-p (lambda (node) (plist-get node :modified)))
-         (modified-file-nodes (if force file-nodes (cl-remove-if-not modified-p file-nodes)))
-         (export-nodes (mapcar (apply-partially 'org-blog--export-file project) modified-file-nodes)))
+         (export-nodes (mapcar (apply-partially 'org-blog--export-file project)
+                               (if force file-nodes (cl-remove-if-not modified-p file-nodes)))))
     (org-blog--server project)
     (org-blog--export-cleanup project file-nodes)
     (org-blog--index project export-nodes production)
