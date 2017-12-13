@@ -125,6 +125,7 @@
          (git-p (file-directory-p ".git")))
     (unless git-p (error "Please setup a .git repository inside the export directory."))
     (org-blog--run "git add --all")
+    (org-blog--run "git reset -- ./cache.el")
     (org-blog--run "git commit -m \"$(date +%Y-%m-%d)\"")
     (org-blog--run "git push -u origin $(git rev-parse --abbrev-ref HEAD)")))
 
