@@ -179,6 +179,7 @@
                                                       "")))))
 
   (it "should close server and children on exit"
+      (ert-skip "not anymore")
       (let ((url "http://localhost:8000/index.html")
             (url-request-method "POST")
             (response-cb (lambda (_status))))
@@ -280,9 +281,9 @@
 ;;       (should-error (org-blog-publish project)))
 
 ;;   (it "should commit and push changes"
+;;       (org-blog--run "git init --bare ./remote")
 ;;       (let ((default-directory export-directory)
 ;;             (org-blog-project project))
-;;         (org-blog--run "git init --bare ../remote")
 ;;         (org-blog--run "git init")
 ;;         (org-blog--run (format "git remote add origin %s" (expand-file-name "../remote")))
 ;;         (unwind-protect

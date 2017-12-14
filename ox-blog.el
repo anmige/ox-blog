@@ -9,9 +9,14 @@
 (require 'ox-blog-server)
 (require 'ox-blog-index)
 
-(if (version< org-version "9") (error "org-blog requires org version >= 9"))
+(if (version< org-version "9")
+    (error "org-blog requires org version >= 9"))
 
-(defvar org-blog-project '())
+(defcustom org-blog-project nil
+  "Project"
+  :type 'plist)
+
+(put 'org-blog-project 'safe-local-variable (lambda (value) t))
 
 (org-export-define-derived-backend 'blog 'html
   :options-alist '((:categories "CATEGORIES") (:type "TYPE"))
@@ -133,6 +138,9 @@
   (interactive)
   (org-blog--export org-blog-project production force))
 
+(defun org-blog--maybe-export ()
+  (if org-blog-project (org-blog--export org-blog-project)))
+
 (defun org-blog--run (command)
   (let ((stdout (generate-new-buffer "stdout"))
         (stderr (generate-new-buffer "stderr")))
@@ -145,8 +153,7 @@
   :lighter " ox-blog"
   :global t
   (if org-blog-mode
-      (add-hook 'after-save-hook 'org-blog-export)
-    (remove-hook 'after-save-hook 'org-blog-export)
-    (org-blog--server-exit org-blog-project)))
+      (add-hook 'after-save-hook 'org-blog--maybe-export)
+    (remove-hook 'after-save-hook 'org-blog--maybe-export)))
 
 (provide 'ox-blog)

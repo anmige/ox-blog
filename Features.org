@@ -1,19 +1,30 @@
 * Planned
-** theme code blocks
-How to allow using a different theme for code blocks
+** minor-mode
+*** server start & shutdown
+Not all projects are known to the minor mode on enable/disable (possibly defined in dir-locals.el).
+- use minor-mode just for export on save
+- use rescheduled timer to kill server on idle
+*** project
+set =dir-locals.el= in blog directory to this
+#+BEGIN_SRC elisp
+((nil
+  (org-blog-project
+   :source-directory "~/Documents/blog/source"
+   :export-directory "~/Documents/blog/export"
+   ...)))
+#+END_SRC
+dir-local-variables-alist can be used to check what variables are dir-local
+* Ideas
+** multi-post files
+Sometimes posts are related and it would be nice to keep them in the same file.
+How would i go about supporting that?
 
-- htmlize css seems fragile. Requires an up to date list of faces used in the
-  blog. Also has to be created somehow.
-- Export from clean emacs session using =emacs --batch=. Can load any theme and
-  set variables to liking without conflicting with actual session. Seems like a
-  good solution. Only problem being =emacs --batch= reporting to be monochrome
-  and some themes respecting that and not applying. Also requires glue code to
-  communicate with subprocess.
-- change where htmlize gets it's face definitions from. loading a theme adds
-  the face definitions to the face symbol. Looking at the symbol rather than
-  the currently applied setting could work.
-  Also look into =htmlize-face-overrides=.
-
+Problem: Caching via modified timestamp of the file falls apart when multiple
+posts are defined in the same file
+** excluding files from publishing
+could be nice to move readme and stuff into the source folder
+would require excluding those files though, so that would need to be customizalble
+not worth it afaict
 ** ertp
 Currently ertp extracts the body of the arounds it is passed to make
 debugging. That leads to non-intuitive behavior when a around definition is
@@ -73,7 +84,23 @@ Maybe the test case is biased? Need to run more tests.
 Would be possible to check whether the function definition has changed and
 inline it again in that case but idk if i want to go through all that. maybe
 the design is just broken.
+** theme code blocks
+How to allow using a different theme for code blocks
+
+- htmlize css seems fragile. Requires an up to date list of faces used in the
+  blog. Also has to be created somehow.
+- Export from clean emacs session using =emacs --batch=. Can load any theme and
+  set variables to liking without conflicting with actual session. Seems like a
+  good solution. Only problem being =emacs --batch= reporting to be monochrome
+  and some themes respecting that and not applying. Also requires glue code to
+  communicate with subprocess.
+- change where htmlize gets it's face definitions from. loading a theme adds
+  the face definitions to the face symbol. Looking at the symbol rather than
+  the currently applied setting could work.
+  Also look into =htmlize-face-overrides=.
+
 ** rss & htmlized source
 - org-org-publish-to-org
 - org-rss-export-to-rss
-* Ideas
+** remove requirement for type setting post
+** content snippet in org-node

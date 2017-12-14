@@ -4,6 +4,7 @@
 (require 'mailcap)
 (require 'subr-x)
 
+(defvar org-blog--server-timer-seconds 60)
 (defvar org-blog--server-livereload-script "
 <script>
 fetch(location.pathname, {method: 'POST'}).then(() => location.reload());
@@ -13,35 +14,39 @@ fetch(location.pathname, {method: 'POST'}).then(() => location.reload());
   (let* ((name "org-blog--server")
          (port (or (plist-get project :port) 8000))
          (directory (plist-get project :export-directory))
-         (plist `(:directory ,directory :ox-blog-server t))
-         (server (or (car (org-blog--server-find-process project nil))
+         (plist `(:directory ,directory :server t :ox-blog t))
+         (server (or (car (org-blog--server-find directory :server))
                      (make-network-process :name name :filter 'org-blog--server-on-chunk
                                            :log 'org-blog--server-on-connect :plist plist
                                            :server t :service port :family 'ipv4 :noquery t))))
+    (run-with-timer org-blog--server-timer-seconds nil 'org-blog--server-kill-on-idle)
     server))
 
-(defun org-blog--server-exit (project)
-  (mapcar 'delete-process (append (org-blog--server-find-process project nil)
-                                  (org-blog--server-find-process project t))))
+(defun org-blog--kill-idle-servers ()
+  (let ((servers (org-blog--server-find nil :server))
+        (is-idle (lambda (p) (null (org-blog--server-find (plist-get p :directory) :client))))
+        (idle-servers (cl-remove-if-not is-idle servers)))
+    (mapc (lambda (server) (delete-process server)) idle-servers))
+  (if (> (length servers) (length idle-servers))
+      (run-with-timer org-blog--server-timer-seconds nil 'org-blog--server-kill-on-idle)))
 
 (defun org-blog--server-refresh-clients (project)
   (mapcar (lambda (client)
             (with-temp-buffer (org-blog--server-send-response client "text/plain" 200)))
-          (org-blog--server-find-process project t)))
+          (org-blog--server-find (plist-get project :export-directory) :client)))
 
-(defun org-blog--server-find-process (project client)
-  (let* ((directory (plist-get project :export-directory))
-         (predicate (lambda (proc) (and (equal (process-get proc :directory) directory)
-                                        (process-get proc :ox-blog-server)
-                                        (if client (process-get proc :ox-blog-client)
-                                          (not (process-get proc :ox-blog-client)))))))
-    (cl-remove-if-not predicate (process-list))))
+(defun org-blog--server-find (directory property)
+  (cl-remove-if-not
+   (lambda (proc) (and (process-get proc :ox-blog)
+                       (if directory (equal (process-get proc :directory) directory) t)
+                       (if property (process-get proc property) t)))
+   (process-list)))
 
 (defun org-blog--server-on-connect (server client message)
   (set-process-sentinel client (apply-partially 'org-blog--server-sentinel server))
-  (process-put client :buffer (generate-new-buffer "*org-blog--server-client*"))
-  (process-put client :ox-blog-client t)
-  (process-put client :directory (process-get server :directory)))
+  (set-process-plist client (list :buffer (generate-new-buffer "*org-blog--server-client*")
+                                  :directory (process-get server :directory)
+                                  :ox-blog t :client t)))
 
 (defun org-blog--server-sentinel (server client message)
   (unless (string-match-p "^open" message)
